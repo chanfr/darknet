@@ -38,6 +38,7 @@ extern "C" int c_max_index(float *a, int n);
 extern "C" void c_do_nms_obj(box *boxes, float **probs, int total, int classes, float thresh);
 //extern "C" void c_get_region_boxes(layer l, int w, int h, float thresh, float **probs, box *boxes, int only_objectness, int *map, float tree_thresh);
 extern "C" void c_get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, float **probs, box *boxes, float **masks, int only_objectness, int *map, float tree_thresh, int relative);
+extern "C" image c_letterbox_image(image im, int w, int h);
 
 
 

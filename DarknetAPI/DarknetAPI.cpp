@@ -60,36 +60,40 @@ DarknetDetections processImageDetection(network& net,image& im, float thresh ){
 
     float hier_thresh=0.5;
 
+
     DarknetDetections detections;
 
     c_set_batch_network(&net, 1);
     srand(2222222);
     clock_t time;
     char buff[256];
+    char *input = buff;
     int j;
-    float nms=.3; //previous 0.4
+    float nms = .3;
 
-    image sized = c_resize_image(im, net.w, net.h);
+    image sized = c_letterbox_image(im, net.w, net.h);
     layer l = net.layers[net.n-1];
 
     box *boxes = (box *)calloc(l.w*l.h*l.n, sizeof(box));
     float **probs = (float **)calloc(l.w*l.h*l.n, sizeof(float *));
-    for(j = 0; j < l.w*l.h*l.n; ++j) probs[j] =(float *) calloc(l.classes + 1, sizeof(float *));
-
+    for(j = 0; j < l.w*l.h*l.n; ++j) probs[j] = (float *)calloc(l.classes + 1, sizeof(float *));
     float **masks = 0;
     if (l.coords > 4){
-        masks = (float **)calloc(l.w*l.h*l.n, sizeof(float*));
-        for(j = 0; j < l.w*l.h*l.n; ++j) masks[j] = (float *)calloc(l.coords-4, sizeof(float *));
+        masks = (float**)calloc(l.w*l.h*l.n, sizeof(float*));
+        for(j = 0; j < l.w*l.h*l.n; ++j) masks[j] = (float*)calloc(l.coords-4, sizeof(float *));
     }
 
     float *X = sized.data;
     time=clock();
     c_network_predict(net, X);
-    printf("Predicted in %f seconds.\n", c_sec(clock()-time));
-//    c_get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0, hier_thresh);
+    printf("%s: Predicted in %f seconds.\n", input, c_sec(clock()-time));
     c_get_region_boxes(l, im.w, im.h, net.w, net.h, thresh, probs, boxes, masks, 0, 0, hier_thresh, 1);
-    if (l.softmax_tree && nms) c_do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
-    else if (nms) c_do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
+    if (l.softmax_tree && nms)
+        c_do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
+    else if (nms)
+        c_do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
+
+
 
     addDetection( im, l.w*l.h * l.n, thresh, boxes, probs, voc_names2, 0, l.classes, detections );
     c_free_image(sized);

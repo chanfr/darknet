@@ -872,6 +872,11 @@ void letterbox_image_into(image im, int w, int h, image boxed)
     free_image(resized);
 }
 
+void c_letterbox_image_into(image im, int w, int h, image boxed){
+    letterbox_image_into(im, w, h, boxed);
+}
+
+
 image letterbox_image(image im, int w, int h)
 {
     int new_w = im.w;
